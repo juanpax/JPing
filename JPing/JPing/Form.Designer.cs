@@ -209,7 +209,7 @@
             this.buttonStop.Name = "buttonStop";
             this.buttonStop.Size = new System.Drawing.Size(75, 41);
             this.buttonStop.TabIndex = 7;
-            this.buttonStop.Tag = "false";
+            this.buttonStop.Tag = "";
             this.buttonStop.Text = "Stop";
             this.buttonStop.UseVisualStyleBackColor = false;
             this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);

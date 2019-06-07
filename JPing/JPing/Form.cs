@@ -10,6 +10,8 @@ namespace JPing
 {
     public partial class Form : System.Windows.Forms.Form
     {
+        private bool StartThread = false;
+
         public Form()
         {
             InitializeComponent();
@@ -24,6 +26,7 @@ namespace JPing
             if (ValidateForm())
             {
                 EnableDisableElements(false);
+                StartThread = true;
                 RemovePingMeFile();
                 WriteLogRecord("Started");
 
@@ -33,13 +36,10 @@ namespace JPing
                 {
                     new Thread(() =>
                     {
-                        Thread.CurrentThread.IsBackground = true;
-                        while (!bool.Parse(buttonStop.Tag.ToString()))
+                        while (StartThread)
                         {
                             SendICMPTraffic(IP);
                         }
-                        Thread.CurrentThread.IsBackground = false;
-                        Thread.CurrentThread.Abort();
                     }).Start();
                 }
                 else if (radioButtonTCP.Checked)
@@ -48,7 +48,7 @@ namespace JPing
 
                     new Thread(() =>
                     {
-                        while (!bool.Parse(buttonStop.Tag.ToString()))
+                        while (StartThread)
                         {
                             SendTCPTraffic(IP, port);
                         }
@@ -64,7 +64,7 @@ namespace JPing
         // Method to stop the pinging process
         private void buttonStop_Click(object sender, EventArgs e)
         {
-            buttonStop.Tag = true;
+            StartThread = false;
             EnableDisableElements(true);
             WriteLogRecord("Stoped");
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -11,6 +12,7 @@ namespace JPing
     public partial class Form : System.Windows.Forms.Form
     {
         private bool StartThread = false;
+        private List<long> TimeAverageList = new List<long>();
 
         public Form()
         {
@@ -39,6 +41,7 @@ namespace JPing
                         while (StartThread)
                         {
                             SendICMPTraffic(IP);
+                            Thread.Sleep(1000);
                         }
                     }).Start();
                 }
@@ -51,6 +54,7 @@ namespace JPing
                         while (StartThread)
                         {
                             SendTCPTraffic(IP, port);
+                            Thread.Sleep(1000);
                         }
                     }).Start();
                 }
@@ -66,7 +70,37 @@ namespace JPing
         {
             StartThread = false;
             EnableDisableElements(true);
+            ProcessTimeValues();
             WriteLogRecord("Stoped");
+        }
+
+        private void ProcessTimeValues()
+        {
+            if (TimeAverageList.Count > 0)
+            {
+                long MinimunTime = TimeAverageList[0];
+                long MaximunTime = TimeAverageList[0];
+
+                long total = 0;
+
+                foreach (long time in TimeAverageList)
+                {
+                    total += time;
+
+                    if (time < MinimunTime)
+                    {
+                        MinimunTime = time;
+                    }
+                    else if (time > MaximunTime)
+                    {
+                        MaximunTime = time;
+                    }
+                }
+
+                labelMinimun.Text = MinimunTime.ToString() + "ms";
+                labelMaximun.Text = MaximunTime.ToString() + "ms";
+                labelTimeAverage.Text = (total / TimeAverageList.Count).ToString() + "ms";
+            }
         }
 
         // Method to enable or disable the view components depending if the program is running or not
@@ -110,8 +144,9 @@ namespace JPing
             }
             catch (Exception ex)
             {
-                buttonStop.Tag = false;
+                StartThread = false;
                 EnableDisableElements(true);
+                ProcessTimeValues();
                 labelError.Text = "There was an error when writing into the PingMe.txt";
             }
         }
@@ -126,14 +161,18 @@ namespace JPing
                 pinger = new Ping();
                 PingReply reply = pinger.Send(IP);
 
-                if (reply.Status != IPStatus.Success)
+                if (reply.Status == IPStatus.Success)
                 {
-                    WriteLogRecord(string.Format("Ping {0} returned: ", IP, reply.Status.ToString()));
+                    TimeAverageList.Add(reply.RoundtripTime);
+                }
+                else
+                {
+                    WriteLogRecord(string.Format("Ping {0} returned: {1}", IP, reply.Status.ToString()));
                 }
             }
             catch (Exception ex)
             {
-                WriteLogRecord(string.Format("Ping {0}. Error: {1}", IP, ex.Message));
+                WriteLogRecord("Internal error: " + ex.Message);
             }
             finally
             {
@@ -189,6 +228,12 @@ namespace JPing
         private void radioButton_CheckedChanged(object sender, EventArgs e)
         {
             ValidateRadioButtons();
+        }
+
+        // Event to be able only to type numbers 
+        private void textBoxPort_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
         }
     }
 }

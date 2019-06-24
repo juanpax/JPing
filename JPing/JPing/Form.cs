@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -14,11 +16,14 @@ namespace JPing
         private bool StartThread = false;
         private List<long> TimeAverageList = new List<long>();
 
+        private int BaseWindowHeight = 0;
+
         public Form()
         {
             InitializeComponent();
-            ValidateRadioButtons();
+            BaseWindowHeight = Size.Height;
 
+            ValidateRadioButtons();
             EnableDisableElements(true);
         }
 
@@ -27,6 +32,12 @@ namespace JPing
         {
             if (ValidateForm())
             {
+                labelStopped.Visible = false;
+                labelStarted.Visible = true;
+                labelMinimun.Text = "0";
+                labelMaximun.Text = "0";
+                labelTimeAverage.Text = "0";
+
                 EnableDisableElements(false);
                 StartThread = true;
                 RemovePingMeFile();
@@ -68,6 +79,9 @@ namespace JPing
         // Method to stop the pinging process
         private void buttonStop_Click(object sender, EventArgs e)
         {
+            labelStarted.Visible = false;
+            labelStopped.Visible = true; 
+
             StartThread = false;
             EnableDisableElements(true);
             ProcessTimeValues();
@@ -100,6 +114,8 @@ namespace JPing
                 labelMinimun.Text = MinimunTime.ToString() + "ms";
                 labelMaximun.Text = MaximunTime.ToString() + "ms";
                 labelTimeAverage.Text = (total / TimeAverageList.Count).ToString() + "ms";
+
+                TimeAverageList.Clear();
             }
         }
 
@@ -107,9 +123,8 @@ namespace JPing
         private void EnableDisableElements(bool state)
         {
             textBoxIP.Enabled = state;
-            radioButtonICMP.Enabled = state;
-            radioButtonTCP.Enabled = state;
-            textBoxPort.Enabled = state;
+            panelProtocols.Enabled = state;
+            panelOptions.Enabled = state;
             buttonSelectFileLocation.Enabled = state;
             buttonStart.Enabled = state;
             buttonStop.Enabled = !state;
@@ -121,11 +136,14 @@ namespace JPing
             return (
                 !string.IsNullOrEmpty(textBoxIP.Text.Trim()) &&
                 buttonSelectFileLocation.Text.Trim() != "Select log location..." &&
-                (radioButtonICMP.Checked || (radioButtonTCP.Checked && !string.IsNullOrEmpty(textBoxPort.Text.Trim())))
+                    (
+                        (radioButtonICMP.Checked && (radioButtonDefault.Checked || (radioButtonCustom.Checked && !string.IsNullOrEmpty(textBoxBytes.Text.Trim()) && !string.IsNullOrEmpty(textBoxTimeout.Text.Trim())))) ||
+                        (radioButtonTCP.Checked && !string.IsNullOrEmpty(textBoxPort.Text.Trim()))
+                    )
                 );
         }
 
-        // Method to delete the PingMe.txt 
+        // Method to delete the JPing.txt 
         private void RemovePingMeFile()
         {
             if (File.Exists(buttonSelectFileLocation.Text.Trim()))
@@ -134,7 +152,7 @@ namespace JPing
             }
         }
 
-        // Method to write a record in the PingMe.txt log
+        // Method to write a record in the JPing.txt log
         private void WriteLogRecord(string message)
         {
             try
@@ -147,7 +165,7 @@ namespace JPing
                 StartThread = false;
                 EnableDisableElements(true);
                 ProcessTimeValues();
-                labelError.Text = "There was an error when writing into the PingMe.txt";
+                labelError.Text = "There was an error when writing into the JPingLog.txt";
             }
         }
 
@@ -159,7 +177,20 @@ namespace JPing
             try
             {
                 pinger = new Ping();
-                PingReply reply = pinger.Send(IP);
+                PingReply reply = null;
+
+                if (radioButtonCustom.Checked)
+                {
+                    int bytes = int.Parse(textBoxBytes.Text.Trim());
+                    int timeout = int.Parse(textBoxTimeout.Text.Trim());
+                    byte[] packet = new byte[bytes];
+
+                    reply = pinger.Send(IP, timeout, packet);
+                }
+                else
+                {
+                    reply = pinger.Send(IP);
+                }
 
                 if (reply.Status == IPStatus.Success)
                 {
@@ -191,7 +222,12 @@ namespace JPing
                 IPAddress IPAddress = IPAddress.Parse(IP);
                 IPEndPoint endPoint = new IPEndPoint(IPAddress, port);
                 Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+                Stopwatch stopWatch = new Stopwatch();
+                stopWatch.Start();
                 sock.Connect(endPoint);
+                stopWatch.Stop();
+                TimeAverageList.Add(stopWatch.ElapsedMilliseconds);
             }
             catch (Exception ex)
             {
@@ -208,7 +244,7 @@ namespace JPing
 
                 if (result == DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
                 {
-                    string path = fbd.SelectedPath + "\\PingMeLog.txt";
+                    string path = fbd.SelectedPath + "\\JPingLog.txt";
 
                     buttonSelectFileLocation.Text = "      " + path;
                     toolTip.SetToolTip(buttonSelectFileLocation, path);
@@ -219,9 +255,15 @@ namespace JPing
         // Method to display or not the Port textBox based on the selected protocol 
         private void ValidateRadioButtons()
         {
-            textBoxPort.Visible = radioButtonTCP.Checked;
-            labelPort.Visible = radioButtonTCP.Checked;
-            labelPort2.Visible = radioButtonTCP.Checked;
+            panelICMPOptions.Visible = radioButtonICMP.Checked;
+            panelPort.Visible = radioButtonTCP.Checked;
+
+            if (radioButtonTCP.Checked)
+            {
+                Size = new Size(Size.Width, BaseWindowHeight);
+            }
+
+            ValidateICMPRadioButtons();
         }
 
         // This method is shared by the two radioButtons
@@ -231,9 +273,25 @@ namespace JPing
         }
 
         // Event to be able only to type numbers 
-        private void textBoxPort_KeyPress(object sender, KeyPressEventArgs e)
+        private void textBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
+        }
+
+        private void radioButtonICMP_CheckedChanged(object sender, EventArgs e)
+        {
+            ValidateICMPRadioButtons();
+        }
+
+        private void ValidateICMPRadioButtons()
+        {
+            panelTimeout.Visible = radioButtonCustom.Checked && radioButtonICMP.Checked;
+            panelBytes.Visible = radioButtonCustom.Checked && radioButtonICMP.Checked;
+
+            if (radioButtonICMP.Checked)
+            {
+                Size = (radioButtonDefault.Checked) ? new Size(Size.Width, BaseWindowHeight) : new Size(Size.Width, BaseWindowHeight + 56);
+            }
         }
     }
 }

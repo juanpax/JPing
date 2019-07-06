@@ -9,6 +9,10 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Forms;
 
+/*
+ * To develop: Include functionality to send UDP traffic 
+ */
+
 namespace JPing
 {
     public partial class Form : System.Windows.Forms.Form
@@ -16,12 +20,10 @@ namespace JPing
         private bool StartThread = false;
         private List<long> TimeAverageList = new List<long>();
 
-        private int BaseWindowHeight = 0;
-
         public Form()
         {
             InitializeComponent();
-            BaseWindowHeight = Size.Height;
+            Size = new Size(Size.Width, Size.Height - 80);
 
             ValidateRadioButtons();
             EnableDisableElements(true);
@@ -32,27 +34,61 @@ namespace JPing
         {
             if (ValidateForm())
             {
-                labelStopped.Visible = false;
-                labelStarted.Visible = true;
-                labelMinimun.Text = "0";
-                labelMaximun.Text = "0";
-                labelTimeAverage.Text = "0";
-
+                ResetLabels();
                 EnableDisableElements(false);
-                StartThread = true;
                 RemovePingMeFile();
                 WriteLogRecord("Started");
 
+                StartThread = true;
+                string timeMethod =
+                        (radioButtonTimeDoNotStop.Checked) ? "Do not stop" :
+                        (radioButtonNumberOfPings.Checked) ? "Number of pings" :
+                        (radioButtonMinutes.Checked) ? "Minutes" : "";
                 string IP = textBoxIP.Text.Trim();
 
                 if (radioButtonICMP.Checked)
                 {
                     new Thread(() =>
                     {
-                        while (StartThread)
+                        switch (timeMethod)
                         {
-                            SendICMPTraffic(IP);
-                            Thread.Sleep(1000);
+                            case "Do not stop":
+                                {
+                                    while (StartThread)
+                                    {
+                                        SendICMPTraffic(IP);
+                                        Thread.Sleep(1000);
+                                    }
+                                    return;
+                                }
+                            case "Number of pings":
+                                {
+                                    long numberOfPings = long.Parse(textBoxCustomTime.Text);
+
+                                    while (StartThread && numberOfPings > 0)
+                                    {
+                                        SendICMPTraffic(IP);
+                                        Thread.Sleep(1000);
+
+                                        numberOfPings--;
+                                    }
+                                    return;
+                                }
+                            case "Minutes":
+                                {
+                                    //********************* Test this part **********
+                                    //************************************************
+                                    long minutes = long.Parse(textBoxCustomTime.Text);
+                                    timer.Enabled = true;
+
+                                    while (StartThread && long.Parse(label16.Text.Split(':')[0]) < minutes)
+                                    {
+                                        SendICMPTraffic(IP);
+                                        Thread.Sleep(1000);
+                                    }
+                                    timer.Enabled = false;
+                                    return;
+                                }
                         }
                     }).Start();
                 }
@@ -62,10 +98,41 @@ namespace JPing
 
                     new Thread(() =>
                     {
-                        while (StartThread)
+                        switch (timeMethod)
                         {
-                            SendTCPTraffic(IP, port);
-                            Thread.Sleep(1000);
+                            case "Do not stop":
+                                {
+                                    while (StartThread)
+                                    {
+                                        SendTCPTraffic(IP, port);
+                                        Thread.Sleep(1000);
+                                    }
+                                    return;
+                                }
+                            case "Number of pings":
+                                {
+                                    long numberOfPings = long.Parse(textBoxCustomTime.Text);
+
+                                    while (StartThread && numberOfPings > 0)
+                                    {
+                                        SendTCPTraffic(IP, port);
+                                        Thread.Sleep(1000);
+
+                                        numberOfPings--;
+                                    }
+                                    return;
+                                }
+                            case "Minutes":
+                                {
+                                    long minutes = long.Parse(textBoxCustomTime.Text);
+
+                                    while (StartThread && long.Parse(label16.Text.Split(':')[0]) < minutes)
+                                    {
+                                        SendTCPTraffic(IP, port);
+                                        Thread.Sleep(1000);
+                                    }
+                                    return;
+                                }
                         }
                     }).Start();
                 }
@@ -76,11 +143,23 @@ namespace JPing
             }
         }
 
+        private void ResetLabels()
+        {
+            label16.Text = "00:00";
+            labelStopped.Visible = false;
+            labelStarted.Visible = true;
+            labelMinimun.Text = "0";
+            labelMaximun.Text = "0";
+            labelTimeAverage.Text = "0";
+        }
+
         // Method to stop the pinging process
         private void buttonStop_Click(object sender, EventArgs e)
         {
+            timer.Enabled = false;
+
             labelStarted.Visible = false;
-            labelStopped.Visible = true; 
+            labelStopped.Visible = true;
 
             StartThread = false;
             EnableDisableElements(true);
@@ -123,8 +202,10 @@ namespace JPing
         private void EnableDisableElements(bool state)
         {
             textBoxIP.Enabled = state;
+            panelTime.Enabled = state;
+            panelTimeOptions.Enabled = state;
             panelProtocols.Enabled = state;
-            panelOptions.Enabled = state;
+            panelProtocolOptions.Enabled = state;
             buttonSelectFileLocation.Enabled = state;
             buttonStart.Enabled = state;
             buttonStop.Enabled = !state;
@@ -135,9 +216,10 @@ namespace JPing
         {
             return (
                 !string.IsNullOrEmpty(textBoxIP.Text.Trim()) &&
+                (radioButtonCustomTime.Checked && !string.IsNullOrEmpty(textBoxCustomTime.Text.Trim())) &&
                 buttonSelectFileLocation.Text.Trim() != "Select log location..." &&
                     (
-                        (radioButtonICMP.Checked && (radioButtonDefault.Checked || (radioButtonCustom.Checked && !string.IsNullOrEmpty(textBoxBytes.Text.Trim()) && !string.IsNullOrEmpty(textBoxTimeout.Text.Trim())))) ||
+                        (radioButtonICMP.Checked && (radioButtonICMPDefault.Checked || (radioButtonICMPCustom.Checked && !string.IsNullOrEmpty(textBoxBytes.Text.Trim()) && !string.IsNullOrEmpty(textBoxTimeout.Text.Trim())))) ||
                         (radioButtonTCP.Checked && !string.IsNullOrEmpty(textBoxPort.Text.Trim()))
                     )
                 );
@@ -179,9 +261,10 @@ namespace JPing
                 pinger = new Ping();
                 PingReply reply = null;
 
-                if (radioButtonCustom.Checked)
+                if (radioButtonICMPCustom.Checked)
                 {
                     int bytes = int.Parse(textBoxBytes.Text.Trim());
+                    bytes = (bytes >= 28) ? bytes - 28 : bytes;
                     int timeout = int.Parse(textBoxTimeout.Text.Trim());
                     byte[] packet = new byte[bytes];
 
@@ -219,13 +302,10 @@ namespace JPing
         {
             try
             {
-                IPAddress IPAddress = IPAddress.Parse(IP);
-                IPEndPoint endPoint = new IPEndPoint(IPAddress, port);
                 Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
                 Stopwatch stopWatch = new Stopwatch();
                 stopWatch.Start();
-                sock.Connect(endPoint);
+                sock.Connect(IP, port);
                 stopWatch.Stop();
                 TimeAverageList.Add(stopWatch.ElapsedMilliseconds);
             }
@@ -255,21 +335,21 @@ namespace JPing
         // Method to display or not the Port textBox based on the selected protocol 
         private void ValidateRadioButtons()
         {
+            ValidateTimeRadioButtons();
+            ValidateProtocolRadioButtons();
+        }
+
+        private void ValidateProtocolRadioButtons()
+        {
             panelICMPOptions.Visible = radioButtonICMP.Checked;
             panelPort.Visible = radioButtonTCP.Checked;
-
-            if (radioButtonTCP.Checked)
-            {
-                Size = new Size(Size.Width, BaseWindowHeight);
-            }
-
-            ValidateICMPRadioButtons();
         }
 
         // This method is shared by the two radioButtons
         private void radioButton_CheckedChanged(object sender, EventArgs e)
         {
-            ValidateRadioButtons();
+            ValidateProtocolRadioButtons();
+            ValidateICMPOptionsRadioButtons();
         }
 
         // Event to be able only to type numbers 
@@ -278,19 +358,57 @@ namespace JPing
             e.Handled = !char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar);
         }
 
-        private void radioButtonICMP_CheckedChanged(object sender, EventArgs e)
+        // Event when the ICMP radio buttons checked status chanched 
+        private void radioButtonICMPOptions_CheckedChanged(object sender, EventArgs e)
         {
-            ValidateICMPRadioButtons();
+            ValidateICMPOptionsRadioButtons();
         }
 
-        private void ValidateICMPRadioButtons()
+        // Method to validate the ICMP Radio buttons
+        private void ValidateICMPOptionsRadioButtons()
         {
-            panelTimeout.Visible = radioButtonCustom.Checked && radioButtonICMP.Checked;
-            panelBytes.Visible = radioButtonCustom.Checked && radioButtonICMP.Checked;
-
-            if (radioButtonICMP.Checked)
+            // This method is configured in this way, so sometimes will not be necessary to decrease or increase the window size
+            if ((radioButtonICMPDefault.Checked || radioButtonTCP.Checked) && (panelICMPTimeout.Visible || panelBytes.Visible))
             {
-                Size = (radioButtonDefault.Checked) ? new Size(Size.Width, BaseWindowHeight) : new Size(Size.Width, BaseWindowHeight + 56);
+                panelICMPTimeout.Visible = false;
+                panelBytes.Visible = false;
+                Size = new Size(Size.Width, Size.Height - 56);
+            }
+            if (radioButtonICMP.Checked && radioButtonICMPCustom.Checked)
+            {
+                panelICMPTimeout.Visible = true;
+                panelBytes.Visible = true;
+                Size = new Size(Size.Width, Size.Height + 56);
+            }
+        }
+
+        private void radioButtonTimeDoNotStop_CheckedChanged(object sender, EventArgs e)
+        {
+            ValidateTimeRadioButtons();
+        }
+
+        private void ValidateTimeRadioButtons()
+        {
+            panelTimeOptions.Visible = radioButtonCustomTime.Checked;
+
+            tableLayoutMainPanel.RowStyles[3] = (radioButtonCustomTime.Checked) ? new RowStyle(SizeType.Absolute, 28F) : new RowStyle(SizeType.Absolute, 0F);
+            Size = (radioButtonCustomTime.Checked) ? new Size(Size.Width, Size.Height + 28) : new Size(Size.Width, Size.Height - 28);
+        }
+
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            string[] currentTimer = label16.Text.Split(':');
+            int seg = int.Parse(currentTimer[1]);
+
+            if (seg < 59)
+            {
+                label16.Text = currentTimer[0] + ":" + ((seg < 9) ? "0" : "") + ++seg;
+            }
+            else
+            {
+                int min = int.Parse(currentTimer[0]);
+
+                label16.Text = ((min < 9) ? "0" : "") + ++min + ":00";
             }
         }
     }

@@ -24,6 +24,8 @@ namespace JPing
         {
             InitializeComponent();
             Size = new Size(Size.Width, Size.Height - 80);
+            timer.Interval = 1000;
+            timer.Tick += new EventHandler(timer_Tick);
 
             ValidateRadioButtons();
             EnableDisableElements(true);
@@ -48,23 +50,26 @@ namespace JPing
 
                 if (radioButtonICMP.Checked)
                 {
-                    new Thread(() =>
+                    switch (timeMethod)
                     {
-                        switch (timeMethod)
-                        {
-                            case "Do not stop":
+                        case "Do not stop":
+                            {
+                                new Thread(() =>
                                 {
                                     while (StartThread)
                                     {
                                         SendICMPTraffic(IP);
                                         Thread.Sleep(1000);
                                     }
-                                    return;
-                                }
-                            case "Number of pings":
-                                {
-                                    long numberOfPings = long.Parse(textBoxCustomTime.Text);
+                                }).Start();
+                                return;
+                            }
+                        case "Number of pings":
+                            {
+                                long numberOfPings = long.Parse(textBoxCustomTime.Text);
 
+                                new Thread(() =>
+                                {
                                     while (StartThread && numberOfPings > 0)
                                     {
                                         SendICMPTraffic(IP);
@@ -72,47 +77,53 @@ namespace JPing
 
                                         numberOfPings--;
                                     }
-                                    return;
-                                }
-                            case "Minutes":
-                                {
-                                    //********************* Test this part **********
-                                    //************************************************
-                                    long minutes = long.Parse(textBoxCustomTime.Text);
-                                    timer.Enabled = true;
+                                }).Start();
+                                return;
+                            }
+                        case "Minutes":
+                            {
+                                long minutes = long.Parse(textBoxCustomTime.Text);
+                                labelTimer.Visible = true;
+                                timer.Enabled = true;
 
-                                    while (StartThread && long.Parse(label16.Text.Split(':')[0]) < minutes)
+                                new Thread(() =>
+                                {
+                                    while (StartThread && long.Parse(labelTimer.Text.Split(':')[0]) < minutes)
                                     {
                                         SendICMPTraffic(IP);
                                         Thread.Sleep(1000);
                                     }
                                     timer.Enabled = false;
-                                    return;
-                                }
-                        }
-                    }).Start();
+                                }).Start();
+                                return;
+                            }
+                    }
+
                 }
                 else if (radioButtonTCP.Checked)
                 {
                     int port = int.Parse(textBoxPort.Text.Trim());
 
-                    new Thread(() =>
+                    switch (timeMethod)
                     {
-                        switch (timeMethod)
-                        {
-                            case "Do not stop":
+                        case "Do not stop":
+                            {
+                                new Thread(() =>
                                 {
                                     while (StartThread)
                                     {
                                         SendTCPTraffic(IP, port);
                                         Thread.Sleep(1000);
                                     }
-                                    return;
-                                }
-                            case "Number of pings":
-                                {
-                                    long numberOfPings = long.Parse(textBoxCustomTime.Text);
+                                }).Start();
+                                return;
+                            }
+                        case "Number of pings":
+                            {
+                                long numberOfPings = long.Parse(textBoxCustomTime.Text);
 
+                                new Thread(() =>
+                                {
                                     while (StartThread && numberOfPings > 0)
                                     {
                                         SendTCPTraffic(IP, port);
@@ -120,21 +131,27 @@ namespace JPing
 
                                         numberOfPings--;
                                     }
-                                    return;
-                                }
-                            case "Minutes":
-                                {
-                                    long minutes = long.Parse(textBoxCustomTime.Text);
+                                }).Start();
+                                return;
+                            }
+                        case "Minutes":
+                            {
+                                long minutes = long.Parse(textBoxCustomTime.Text);
+                                labelTimer.Visible = true;
+                                timer.Enabled = true;
 
-                                    while (StartThread && long.Parse(label16.Text.Split(':')[0]) < minutes)
+                                new Thread(() =>
+                                {
+                                    while (StartThread && long.Parse(labelTimer.Text.Split(':')[0]) < minutes)
                                     {
                                         SendTCPTraffic(IP, port);
                                         Thread.Sleep(1000);
                                     }
-                                    return;
-                                }
-                        }
-                    }).Start();
+                                    timer.Enabled = false;
+                                }).Start();
+                                return;
+                            }
+                    }
                 }
             }
             else
@@ -145,7 +162,8 @@ namespace JPing
 
         private void ResetLabels()
         {
-            label16.Text = "00:00";
+            labelTimer.Text = "00:00";
+            labelTimer.Visible = false;
             labelStopped.Visible = false;
             labelStarted.Visible = true;
             labelMinimun.Text = "0";
@@ -397,19 +415,24 @@ namespace JPing
 
         private void timer_Tick(object sender, EventArgs e)
         {
-            string[] currentTimer = label16.Text.Split(':');
+            string[] currentTimer = labelTimer.Text.Split(':');
             int seg = int.Parse(currentTimer[1]);
 
             if (seg < 59)
             {
-                label16.Text = currentTimer[0] + ":" + ((seg < 9) ? "0" : "") + ++seg;
+                labelTimer.Text = currentTimer[0] + ":" + ((seg < 9) ? "0" : "") + ++seg;
             }
             else
             {
                 int min = int.Parse(currentTimer[0]);
 
-                label16.Text = ((min < 9) ? "0" : "") + ++min + ":00";
+                labelTimer.Text = ((min < 9) ? "0" : "") + ++min + ":00";
             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            timer.Enabled = true;
         }
     }
 }

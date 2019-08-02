@@ -78,6 +78,7 @@
             this.textBoxCustomTime = new System.Windows.Forms.TextBox();
             this.radioButtonMinutes = new System.Windows.Forms.RadioButton();
             this.radioButtonNumberOfPings = new System.Windows.Forms.RadioButton();
+            this.labelTimer = new System.Windows.Forms.Label();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.tableLayoutPanel3 = new System.Windows.Forms.TableLayoutPanel();
             this.label5 = new System.Windows.Forms.Label();
@@ -90,7 +91,7 @@
             this.panel2 = new System.Windows.Forms.Panel();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.timer = new System.Windows.Forms.Timer(this.components);
-            this.label16 = new System.Windows.Forms.Label();
+            this.button1 = new System.Windows.Forms.Button();
             this.tableLayoutMainPanel.SuspendLayout();
             this.panelProtocols.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -131,7 +132,8 @@
             this.tableLayoutMainPanel.Controls.Add(this.panel7, 1, 2);
             this.tableLayoutMainPanel.Controls.Add(this.panelTime, 2, 2);
             this.tableLayoutMainPanel.Controls.Add(this.panel9, 2, 3);
-            this.tableLayoutMainPanel.Controls.Add(this.label16, 1, 3);
+            this.tableLayoutMainPanel.Controls.Add(this.labelTimer, 1, 3);
+            this.tableLayoutMainPanel.Controls.Add(this.button1, 1, 6);
             this.tableLayoutMainPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutMainPanel.Location = new System.Drawing.Point(11, 10);
             this.tableLayoutMainPanel.Margin = new System.Windows.Forms.Padding(0);
@@ -166,7 +168,7 @@
             this.radioButtonTCP.Dock = System.Windows.Forms.DockStyle.Left;
             this.radioButtonTCP.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.radioButtonTCP.Location = new System.Drawing.Point(81, 0);
-            this.radioButtonTCP.Margin = new System.Windows.Forms.Padding(4);
+            this.radioButtonTCP.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.radioButtonTCP.Name = "radioButtonTCP";
             this.radioButtonTCP.Size = new System.Drawing.Size(67, 39);
             this.radioButtonTCP.TabIndex = 3;
@@ -180,7 +182,7 @@
             this.radioButtonICMP.Dock = System.Windows.Forms.DockStyle.Left;
             this.radioButtonICMP.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.radioButtonICMP.Location = new System.Drawing.Point(0, 0);
-            this.radioButtonICMP.Margin = new System.Windows.Forms.Padding(4);
+            this.radioButtonICMP.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.radioButtonICMP.Name = "radioButtonICMP";
             this.radioButtonICMP.Size = new System.Drawing.Size(81, 39);
             this.radioButtonICMP.TabIndex = 2;
@@ -194,7 +196,7 @@
             this.textBoxIP.Dock = System.Windows.Forms.DockStyle.Fill;
             this.textBoxIP.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.textBoxIP.Location = new System.Drawing.Point(193, 34);
-            this.textBoxIP.Margin = new System.Windows.Forms.Padding(4);
+            this.textBoxIP.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.textBoxIP.Name = "textBoxIP";
             this.textBoxIP.Size = new System.Drawing.Size(529, 32);
             this.textBoxIP.TabIndex = 4;
@@ -218,7 +220,7 @@
             this.buttonStop.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonStop.ForeColor = System.Drawing.Color.White;
             this.buttonStop.Location = new System.Drawing.Point(333, 0);
-            this.buttonStop.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonStop.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonStop.Name = "buttonStop";
             this.buttonStop.Size = new System.Drawing.Size(100, 50);
             this.buttonStop.TabIndex = 7;
@@ -235,7 +237,7 @@
             this.buttonStart.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.buttonStart.ForeColor = System.Drawing.Color.White;
             this.buttonStart.Location = new System.Drawing.Point(433, 0);
-            this.buttonStart.Margin = new System.Windows.Forms.Padding(4);
+            this.buttonStart.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.buttonStart.Name = "buttonStart";
             this.buttonStart.Size = new System.Drawing.Size(100, 50);
             this.buttonStart.TabIndex = 6;
@@ -490,7 +492,7 @@
             this.radioButtonICMPCustom.Dock = System.Windows.Forms.DockStyle.Left;
             this.radioButtonICMPCustom.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.radioButtonICMPCustom.Location = new System.Drawing.Point(92, 0);
-            this.radioButtonICMPCustom.Margin = new System.Windows.Forms.Padding(4);
+            this.radioButtonICMPCustom.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.radioButtonICMPCustom.Name = "radioButtonICMPCustom";
             this.radioButtonICMPCustom.Size = new System.Drawing.Size(95, 34);
             this.radioButtonICMPCustom.TabIndex = 8;
@@ -504,7 +506,7 @@
             this.radioButtonICMPDefault.Dock = System.Windows.Forms.DockStyle.Left;
             this.radioButtonICMPDefault.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.radioButtonICMPDefault.Location = new System.Drawing.Point(0, 0);
-            this.radioButtonICMPDefault.Margin = new System.Windows.Forms.Padding(4);
+            this.radioButtonICMPDefault.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.radioButtonICMPDefault.Name = "radioButtonICMPDefault";
             this.radioButtonICMPDefault.Size = new System.Drawing.Size(92, 34);
             this.radioButtonICMPDefault.TabIndex = 7;
@@ -655,7 +657,7 @@
             this.radioButtonCustomTime.Dock = System.Windows.Forms.DockStyle.Left;
             this.radioButtonCustomTime.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.radioButtonCustomTime.Location = new System.Drawing.Point(145, 0);
-            this.radioButtonCustomTime.Margin = new System.Windows.Forms.Padding(4);
+            this.radioButtonCustomTime.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.radioButtonCustomTime.Name = "radioButtonCustomTime";
             this.radioButtonCustomTime.Size = new System.Drawing.Size(106, 39);
             this.radioButtonCustomTime.TabIndex = 3;
@@ -669,7 +671,7 @@
             this.radioButtonTimeDoNotStop.Dock = System.Windows.Forms.DockStyle.Left;
             this.radioButtonTimeDoNotStop.Font = new System.Drawing.Font("Century Gothic", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.radioButtonTimeDoNotStop.Location = new System.Drawing.Point(0, 0);
-            this.radioButtonTimeDoNotStop.Margin = new System.Windows.Forms.Padding(4);
+            this.radioButtonTimeDoNotStop.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.radioButtonTimeDoNotStop.Name = "radioButtonTimeDoNotStop";
             this.radioButtonTimeDoNotStop.Size = new System.Drawing.Size(145, 39);
             this.radioButtonTimeDoNotStop.TabIndex = 2;
@@ -718,7 +720,7 @@
             this.radioButtonMinutes.Dock = System.Windows.Forms.DockStyle.Left;
             this.radioButtonMinutes.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.radioButtonMinutes.Location = new System.Drawing.Point(166, 0);
-            this.radioButtonMinutes.Margin = new System.Windows.Forms.Padding(4);
+            this.radioButtonMinutes.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.radioButtonMinutes.Name = "radioButtonMinutes";
             this.radioButtonMinutes.Size = new System.Drawing.Size(101, 39);
             this.radioButtonMinutes.TabIndex = 8;
@@ -732,13 +734,23 @@
             this.radioButtonNumberOfPings.Dock = System.Windows.Forms.DockStyle.Left;
             this.radioButtonNumberOfPings.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.radioButtonNumberOfPings.Location = new System.Drawing.Point(0, 0);
-            this.radioButtonNumberOfPings.Margin = new System.Windows.Forms.Padding(4);
+            this.radioButtonNumberOfPings.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.radioButtonNumberOfPings.Name = "radioButtonNumberOfPings";
             this.radioButtonNumberOfPings.Size = new System.Drawing.Size(166, 39);
             this.radioButtonNumberOfPings.TabIndex = 7;
             this.radioButtonNumberOfPings.TabStop = true;
             this.radioButtonNumberOfPings.Text = "Number of pings";
             this.radioButtonNumberOfPings.UseVisualStyleBackColor = true;
+            // 
+            // labelTimer
+            // 
+            this.labelTimer.AutoSize = true;
+            this.labelTimer.Dock = System.Windows.Forms.DockStyle.Right;
+            this.labelTimer.Location = new System.Drawing.Point(142, 108);
+            this.labelTimer.Name = "labelTimer";
+            this.labelTimer.Size = new System.Drawing.Size(44, 34);
+            this.labelTimer.TabIndex = 20;
+            this.labelTimer.Text = "00:00";
             // 
             // tableLayoutPanel2
             // 
@@ -774,7 +786,7 @@
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 47F));
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 61F));
             this.tableLayoutPanel3.Controls.Add(this.label5, 3, 0);
             this.tableLayoutPanel3.Controls.Add(this.labelMinimun, 4, 0);
             this.tableLayoutPanel3.Controls.Add(this.label7, 5, 0);
@@ -816,7 +828,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Century Gothic", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(378, 0);
+            this.label7.Location = new System.Drawing.Point(373, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(50, 19);
             this.label7.TabIndex = 2;
@@ -826,7 +838,7 @@
             // 
             this.labelMaximun.AutoSize = true;
             this.labelMaximun.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelMaximun.Location = new System.Drawing.Point(445, 0);
+            this.labelMaximun.Location = new System.Drawing.Point(440, 0);
             this.labelMaximun.Name = "labelMaximun";
             this.labelMaximun.Size = new System.Drawing.Size(19, 21);
             this.labelMaximun.TabIndex = 3;
@@ -836,7 +848,7 @@
             // 
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Century Gothic", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.Location = new System.Drawing.Point(533, 0);
+            this.label9.Location = new System.Drawing.Point(523, 0);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(86, 19);
             this.label9.TabIndex = 4;
@@ -846,7 +858,7 @@
             // 
             this.labelTimeAverage.AutoSize = true;
             this.labelTimeAverage.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelTimeAverage.Location = new System.Drawing.Point(633, 0);
+            this.labelTimeAverage.Location = new System.Drawing.Point(623, 0);
             this.labelTimeAverage.Name = "labelTimeAverage";
             this.labelTimeAverage.Size = new System.Drawing.Size(19, 21);
             this.labelTimeAverage.TabIndex = 5;
@@ -867,7 +879,7 @@
             this.panel2.BackColor = System.Drawing.Color.Black;
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel2.Location = new System.Drawing.Point(217, 4);
-            this.panel2.Margin = new System.Windows.Forms.Padding(4);
+            this.panel2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(1, 31);
             this.panel2.TabIndex = 7;
@@ -877,14 +889,15 @@
             this.timer.Interval = 1000;
             this.timer.Tick += new System.EventHandler(this.timer_Tick);
             // 
-            // label16
+            // button1
             // 
-            this.label16.AutoSize = true;
-            this.label16.Location = new System.Drawing.Point(43, 108);
-            this.label16.Name = "label16";
-            this.label16.Size = new System.Drawing.Size(44, 17);
-            this.label16.TabIndex = 20;
-            this.label16.Text = "00:00";
+            this.button1.Location = new System.Drawing.Point(43, 322);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 21;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // Form
             // 
@@ -894,7 +907,7 @@
             this.Controls.Add(this.tableLayoutPanel2);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4);
+            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "Form";
@@ -998,7 +1011,8 @@
         private System.Windows.Forms.RadioButton radioButtonMinutes;
         private System.Windows.Forms.RadioButton radioButtonNumberOfPings;
         private System.Windows.Forms.Timer timer;
-        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.Label labelTimer;
+        private System.Windows.Forms.Button button1;
     }
 }
 

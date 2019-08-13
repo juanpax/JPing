@@ -10,7 +10,10 @@ using System.Threading;
 using System.Windows.Forms;
 
 /*
- * To develop: Include functionality to send UDP traffic 
+ * To develop: Include functionality to send UDP traffic  https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.udpclient?view=netframework-4.8 create a demo too 
+ * Include label to see the number of pings happening
+ * Funcionallity to capture all the packet information Check this: https://stackoverflow.com/questions/1863564/how-to-capture-http-packet-with-sharppcap and https://www.codeproject.com/Articles/12458/SharpPcap-A-Packet-Capture-Framework-for-NET could be a good idea to create a demo first
+ * In the future would be good idea to be able to select if you want to capture only the failures (select what kind of failures) or everything, so basically would generate a .pcap and you read the file from Netmon or wireshark
  */
 
 namespace JPing

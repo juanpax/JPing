@@ -23,6 +23,10 @@ namespace JPing
         private bool StartThread = false;
         private List<long> TimeAverageList = new List<long>();
 
+        /* Variables to control the timer */
+        public bool tick = false;
+        long currentMinutes = 0;
+
         public Form()
         {
             InitializeComponent();
@@ -51,6 +55,9 @@ namespace JPing
                         (radioButtonMinutes.Checked) ? "Minutes" : "";
                 string IP = textBoxIP.Text.Trim();
 
+                //DelegateICMP methodToExecute = new DelegateICMP(SendICMPTraffic);
+
+
                 if (radioButtonICMP.Checked)
                 {
                     switch (timeMethod)
@@ -61,6 +68,8 @@ namespace JPing
                                 {
                                     while (StartThread)
                                     {
+                                        //methodToExecute.Invoke(IP);
+
                                         SendICMPTraffic(IP);
                                         Thread.Sleep(1000);
                                     }
@@ -70,6 +79,7 @@ namespace JPing
                         case "Number of pings":
                             {
                                 long numberOfPings = long.Parse(textBoxCustomTime.Text);
+                                labelCounter.Visible = true;
 
                                 new Thread(() =>
                                 {
@@ -78,6 +88,7 @@ namespace JPing
                                         SendICMPTraffic(IP);
                                         Thread.Sleep(1000);
 
+                                        labelCounter.Invoke(new Action(() => labelCounter.Text = (long.Parse(labelCounter.Text) + 1).ToString()));
                                         numberOfPings--;
                                     }
                                 }).Start();
@@ -91,7 +102,7 @@ namespace JPing
 
                                 new Thread(() =>
                                 {
-                                    while (StartThread && long.Parse(labelTimer.Text.Split(':')[0]) < minutes)
+                                    while (StartThread && currentMinutes < minutes)
                                     {
                                         SendICMPTraffic(IP);
                                         Thread.Sleep(1000);
@@ -124,6 +135,7 @@ namespace JPing
                         case "Number of pings":
                             {
                                 long numberOfPings = long.Parse(textBoxCustomTime.Text);
+                                labelCounter.Visible = true;
 
                                 new Thread(() =>
                                 {
@@ -132,6 +144,7 @@ namespace JPing
                                         SendTCPTraffic(IP, port);
                                         Thread.Sleep(1000);
 
+                                        labelCounter.Invoke(new Action(() => labelCounter.Text = (long.Parse(labelCounter.Text) + 1).ToString()));
                                         numberOfPings--;
                                     }
                                 }).Start();
@@ -167,6 +180,8 @@ namespace JPing
         {
             labelTimer.Text = "00:00";
             labelTimer.Visible = false;
+            labelCounter.Text = "0";
+            labelCounter.Visible = false;
             labelStopped.Visible = false;
             labelStarted.Visible = true;
             labelMinimun.Text = "0";
@@ -178,10 +193,10 @@ namespace JPing
         private void buttonStop_Click(object sender, EventArgs e)
         {
             timer.Enabled = false;
-
+            labelTimer.Visible = false;
+            labelCounter.Visible = false;
             labelStarted.Visible = false;
             labelStopped.Visible = true;
-
             StartThread = false;
             EnableDisableElements(true);
             ProcessTimeValues();
@@ -271,6 +286,9 @@ namespace JPing
                 labelError.Text = "There was an error when writing into the JPingLog.txt";
             }
         }
+
+
+        public delegate void DelegateICMP(string IP);
 
         // Method to send ICMP traffic 
         public void SendICMPTraffic(string IP)
@@ -418,24 +436,23 @@ namespace JPing
 
         private void timer_Tick(object sender, EventArgs e)
         {
-            string[] currentTimer = labelTimer.Text.Split(':');
-            int seg = int.Parse(currentTimer[1]);
-
-            if (seg < 59)
+            if (tick)
             {
-                labelTimer.Text = currentTimer[0] + ":" + ((seg < 9) ? "0" : "") + ++seg;
-            }
-            else
-            {
-                int min = int.Parse(currentTimer[0]);
+                string[] currentTimer = labelTimer.Text.Split(':');
+                int seg = int.Parse(currentTimer[1]);
 
-                labelTimer.Text = ((min < 9) ? "0" : "") + ++min + ":00";
+                if (seg < 59)
+                {
+                    labelTimer.Text = currentTimer[0] + ":" + ((seg < 9) ? "0" : "") + ++seg;
+                }
+                else
+                {
+                    int min = int.Parse(currentTimer[0]);
+                    labelTimer.Text = ((min < 9) ? "0" : "") + ++min + ":00";
+                    currentMinutes++;
+                }
             }
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            timer.Enabled = true;
+            tick = !tick;
         }
     }
 }

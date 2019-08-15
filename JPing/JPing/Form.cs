@@ -10,8 +10,8 @@ using System.Threading;
 using System.Windows.Forms;
 
 /*
+ * Add label saying number of fail or successful attempts 
  * To develop: Include functionality to send UDP traffic  https://docs.microsoft.com/en-us/dotnet/api/system.net.sockets.udpclient?view=netframework-4.8 create a demo too 
- * Include label to see the number of pings happening
  * Funcionallity to capture all the packet information Check this: https://stackoverflow.com/questions/1863564/how-to-capture-http-packet-with-sharppcap and https://www.codeproject.com/Articles/12458/SharpPcap-A-Packet-Capture-Framework-for-NET could be a good idea to create a demo first
  * In the future would be good idea to be able to select if you want to capture only the failures (select what kind of failures) or everything, so basically would generate a .pcap and you read the file from Netmon or wireshark
  */
@@ -35,7 +35,7 @@ namespace JPing
             timer.Tick += new EventHandler(timer_Tick);
 
             ValidateRadioButtons();
-            EnableDisableElements(true);
+            EnableDisableElements(true, false);
         }
 
         // Method to start the pinging process 
@@ -44,130 +44,72 @@ namespace JPing
             if (ValidateForm())
             {
                 ResetLabels();
-                EnableDisableElements(false);
-                RemovePingMeFile();
+                EnableDisableElements(false, false);
+                RemoveJPingFile();
                 WriteLogRecord("Started");
 
-                StartThread = true;
                 string timeMethod =
                         (radioButtonTimeDoNotStop.Checked) ? "Do not stop" :
                         (radioButtonNumberOfPings.Checked) ? "Number of pings" :
                         (radioButtonMinutes.Checked) ? "Minutes" : "";
+
+                DelegateMethod pingMethod =
+                    (radioButtonICMP.Checked) ? new DelegateMethod(SendICMPTraffic) :
+                    (radioButtonTCP.Checked) ? new DelegateMethod(SendTCPTraffic) : null;
+
                 string IP = textBoxIP.Text.Trim();
+                StartThread = true;
 
-                //DelegateICMP methodToExecute = new DelegateICMP(SendICMPTraffic);
-
-
-                if (radioButtonICMP.Checked)
+                switch (timeMethod)
                 {
-                    switch (timeMethod)
-                    {
-                        case "Do not stop":
+                    case "Do not stop":
+                        {
+                            new Thread(() =>
                             {
-                                new Thread(() =>
+                                while (StartThread)
                                 {
-                                    while (StartThread)
-                                    {
-                                        //methodToExecute.Invoke(IP);
+                                    pingMethod.Invoke(IP);
+                                    Thread.Sleep(1000);
+                                }
+                            }).Start();
+                            return;
+                        }
+                    case "Number of pings":
+                        {
+                            long numberOfPings = long.Parse(textBoxCustomTime.Text);
+                            labelCounter.Visible = true;
 
-                                        SendICMPTraffic(IP);
-                                        Thread.Sleep(1000);
-                                    }
-                                }).Start();
-                                return;
-                            }
-                        case "Number of pings":
+                            new Thread(() =>
                             {
-                                long numberOfPings = long.Parse(textBoxCustomTime.Text);
-                                labelCounter.Visible = true;
-
-                                new Thread(() =>
+                                while (StartThread && numberOfPings > 0)
                                 {
-                                    while (StartThread && numberOfPings > 0)
-                                    {
-                                        SendICMPTraffic(IP);
-                                        Thread.Sleep(1000);
+                                    pingMethod.Invoke(IP);
+                                    Thread.Sleep(1000);
 
-                                        labelCounter.Invoke(new Action(() => labelCounter.Text = (long.Parse(labelCounter.Text) + 1).ToString()));
-                                        numberOfPings--;
-                                    }
-                                }).Start();
-                                return;
-                            }
-                        case "Minutes":
+                                    labelCounter.Invoke(new Action(() => labelCounter.Text = (long.Parse(labelCounter.Text) + 1).ToString()));
+                                    numberOfPings--;
+                                }
+                                StopMethod(true);
+                            }).Start();
+                            return;
+                        }
+                    case "Minutes":
+                        {
+                            long minutes = long.Parse(textBoxCustomTime.Text);
+                            labelTimer.Visible = true;
+                            timer.Enabled = true;
+
+                            new Thread(() =>
                             {
-                                long minutes = long.Parse(textBoxCustomTime.Text);
-                                labelTimer.Visible = true;
-                                timer.Enabled = true;
-
-                                new Thread(() =>
+                                while (StartThread && currentMinutes < minutes)
                                 {
-                                    while (StartThread && currentMinutes < minutes)
-                                    {
-                                        SendICMPTraffic(IP);
-                                        Thread.Sleep(1000);
-                                    }
-                                    timer.Enabled = false;
-                                }).Start();
-                                return;
-                            }
-                    }
-
-                }
-                else if (radioButtonTCP.Checked)
-                {
-                    int port = int.Parse(textBoxPort.Text.Trim());
-
-                    switch (timeMethod)
-                    {
-                        case "Do not stop":
-                            {
-                                new Thread(() =>
-                                {
-                                    while (StartThread)
-                                    {
-                                        SendTCPTraffic(IP, port);
-                                        Thread.Sleep(1000);
-                                    }
-                                }).Start();
-                                return;
-                            }
-                        case "Number of pings":
-                            {
-                                long numberOfPings = long.Parse(textBoxCustomTime.Text);
-                                labelCounter.Visible = true;
-
-                                new Thread(() =>
-                                {
-                                    while (StartThread && numberOfPings > 0)
-                                    {
-                                        SendTCPTraffic(IP, port);
-                                        Thread.Sleep(1000);
-
-                                        labelCounter.Invoke(new Action(() => labelCounter.Text = (long.Parse(labelCounter.Text) + 1).ToString()));
-                                        numberOfPings--;
-                                    }
-                                }).Start();
-                                return;
-                            }
-                        case "Minutes":
-                            {
-                                long minutes = long.Parse(textBoxCustomTime.Text);
-                                labelTimer.Visible = true;
-                                timer.Enabled = true;
-
-                                new Thread(() =>
-                                {
-                                    while (StartThread && long.Parse(labelTimer.Text.Split(':')[0]) < minutes)
-                                    {
-                                        SendTCPTraffic(IP, port);
-                                        Thread.Sleep(1000);
-                                    }
-                                    timer.Enabled = false;
-                                }).Start();
-                                return;
-                            }
-                    }
+                                    pingMethod.Invoke(IP);
+                                    Thread.Sleep(1000);
+                                }
+                                StopMethod(true);
+                            }).Start();
+                            return;
+                        }
                 }
             }
             else
@@ -176,6 +118,7 @@ namespace JPing
             }
         }
 
+        // Method to reset the Labels text
         private void ResetLabels()
         {
             labelTimer.Text = "00:00";
@@ -192,18 +135,37 @@ namespace JPing
         // Method to stop the pinging process
         private void buttonStop_Click(object sender, EventArgs e)
         {
-            timer.Enabled = false;
-            labelTimer.Visible = false;
-            labelCounter.Visible = false;
-            labelStarted.Visible = false;
-            labelStopped.Visible = true;
+            StopMethod(false);
+        }
+
+        // Method when the user stops the process or it finished
+        public void StopMethod(bool differentThread)
+        {
             StartThread = false;
-            EnableDisableElements(true);
-            ProcessTimeValues();
+            timer.Enabled = false;
+
+            if (differentThread)
+            {
+                labelTimer.Invoke(new Action(() => labelTimer.Visible = false));
+                labelCounter.Invoke(new Action(() => labelCounter.Visible = false));
+                labelStarted.Invoke(new Action(() => labelStarted.Visible = false));
+                labelStopped.Invoke(new Action(() => labelStopped.Visible = false));
+            }
+            else
+            {
+                labelTimer.Visible = false;
+                labelCounter.Visible = false;
+                labelStarted.Visible = false;
+                labelStopped.Visible = false;
+            }
+
+            EnableDisableElements(true, differentThread);
+            ProcessTimeValues(differentThread);
             WriteLogRecord("Stoped");
         }
 
-        private void ProcessTimeValues()
+        // Method to validate the successful traffic stats 
+        private void ProcessTimeValues(bool differentThread)
         {
             if (TimeAverageList.Count > 0)
             {
@@ -226,25 +188,50 @@ namespace JPing
                     }
                 }
 
-                labelMinimun.Text = MinimunTime.ToString() + "ms";
-                labelMaximun.Text = MaximunTime.ToString() + "ms";
-                labelTimeAverage.Text = (total / TimeAverageList.Count).ToString() + "ms";
+                if (differentThread)
+                {
+                    labelMinimun.Invoke(new Action(() => labelMinimun.Text = MinimunTime.ToString() + "ms"));
+                    labelMaximun.Invoke(new Action(() => labelMaximun.Text = MaximunTime.ToString() + "ms"));
+                    labelTimeAverage.Invoke(new Action(() => labelTimeAverage.Text = (total / TimeAverageList.Count).ToString() + "ms"));
+                }
+                else
+                {
+                    labelMinimun.Text = MinimunTime.ToString() + "ms";
+                    labelMaximun.Text = MaximunTime.ToString() + "ms";
+                    labelTimeAverage.Text = (total / TimeAverageList.Count).ToString() + "ms";
+                }                
 
                 TimeAverageList.Clear();
             }
         }
 
         // Method to enable or disable the view components depending if the program is running or not
-        private void EnableDisableElements(bool state)
+        private void EnableDisableElements(bool state, bool differentThread)
         {
-            textBoxIP.Enabled = state;
-            panelTime.Enabled = state;
-            panelTimeOptions.Enabled = state;
-            panelProtocols.Enabled = state;
-            panelProtocolOptions.Enabled = state;
-            buttonSelectFileLocation.Enabled = state;
-            buttonStart.Enabled = state;
-            buttonStop.Enabled = !state;
+            if (differentThread)
+            {
+                textBoxIP.Invoke(new Action(() => textBoxIP.Enabled = state));
+                panelTime.Invoke(new Action(() => panelTime.Enabled = state));
+                panelTimeOptions.Invoke(new Action(() => panelTimeOptions.Enabled = state));
+                panelProtocols.Invoke(new Action(() => panelProtocols.Enabled = state));
+                panelProtocolOptions.Invoke(new Action(() => panelProtocolOptions.Enabled = state));
+                buttonSelectFileLocation.Invoke(new Action(() => buttonSelectFileLocation.Enabled = state));
+                buttonStart.Invoke(new Action(() => buttonStart.Enabled = state));
+                buttonStop.Invoke(new Action(() => buttonStop.Enabled = !state));
+            }
+            else
+            {
+                textBoxIP.Enabled = state;
+                panelTime.Enabled = state;
+                panelTimeOptions.Enabled = state;
+                panelProtocols.Enabled = state;
+                panelProtocolOptions.Enabled = state;
+                buttonSelectFileLocation.Enabled = state;
+                buttonStart.Enabled = state;
+                buttonStop.Enabled = !state;
+            }
+            buttonStart.BackColor = (state) ? Color.MediumSeaGreen : Color.Gray;
+            buttonStop.BackColor = (!state) ? Color.Brown : Color.Gray;
         }
 
         // Method to validate the form before starting the pinging process
@@ -252,7 +239,7 @@ namespace JPing
         {
             return (
                 !string.IsNullOrEmpty(textBoxIP.Text.Trim()) &&
-                (radioButtonCustomTime.Checked && !string.IsNullOrEmpty(textBoxCustomTime.Text.Trim())) &&
+                (radioButtonTimeDoNotStop.Checked || (radioButtonCustomTime.Checked && !string.IsNullOrEmpty(textBoxCustomTime.Text.Trim()))) &&
                 buttonSelectFileLocation.Text.Trim() != "Select log location..." &&
                     (
                         (radioButtonICMP.Checked && (radioButtonICMPDefault.Checked || (radioButtonICMPCustom.Checked && !string.IsNullOrEmpty(textBoxBytes.Text.Trim()) && !string.IsNullOrEmpty(textBoxTimeout.Text.Trim())))) ||
@@ -262,7 +249,7 @@ namespace JPing
         }
 
         // Method to delete the JPing.txt 
-        private void RemovePingMeFile()
+        private void RemoveJPingFile()
         {
             if (File.Exists(buttonSelectFileLocation.Text.Trim()))
             {
@@ -281,14 +268,14 @@ namespace JPing
             catch (Exception ex)
             {
                 StartThread = false;
-                EnableDisableElements(true);
-                ProcessTimeValues();
+                EnableDisableElements(true, false);
+                ProcessTimeValues(false);
                 labelError.Text = "There was an error when writing into the JPingLog.txt";
             }
         }
 
-
-        public delegate void DelegateICMP(string IP);
+        // Delegate method, this method is going to work for ICM, TCP and UDP and it is only one method declaration
+        public delegate void DelegateMethod(string IP);
 
         // Method to send ICMP traffic 
         public void SendICMPTraffic(string IP)
@@ -337,8 +324,10 @@ namespace JPing
         }
 
         // Method to send TCP traffic 
-        private void SendTCPTraffic(string IP, int port)
+        private void SendTCPTraffic(string IP)
         {
+            int port = int.Parse(textBoxPort.Text.Trim());
+
             try
             {
                 Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -421,6 +410,7 @@ namespace JPing
             }
         }
 
+        // Event when the do not stop option change
         private void radioButtonTimeDoNotStop_CheckedChanged(object sender, EventArgs e)
         {
             ValidateTimeRadioButtons();
@@ -434,6 +424,7 @@ namespace JPing
             Size = (radioButtonCustomTime.Checked) ? new Size(Size.Width, Size.Height + 28) : new Size(Size.Width, Size.Height - 28);
         }
 
+        // Event when the tick happens
         private void timer_Tick(object sender, EventArgs e)
         {
             if (tick)

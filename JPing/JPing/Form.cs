@@ -117,7 +117,6 @@ namespace JPing
             labelTimer.Visible = false;
             labelCounter.Text = "0";
             labelCounter.Visible = false;
-            labelStopped.Visible = false;
             labelStarted.Visible = true;
             labelMinimun.Text = "0";
             labelMaximun.Text = "0";
@@ -141,14 +140,12 @@ namespace JPing
                 labelTimer.Invoke(new Action(() => labelTimer.Visible = false));
                 labelCounter.Invoke(new Action(() => labelCounter.Visible = false));
                 labelStarted.Invoke(new Action(() => labelStarted.Visible = false));
-                labelStopped.Invoke(new Action(() => labelStopped.Visible = false));
             }
             else
             {
                 labelTimer.Visible = false;
                 labelCounter.Visible = false;
                 labelStarted.Visible = false;
-                labelStopped.Visible = false;
             }
 
             EnableDisableElements(true, differentThread);

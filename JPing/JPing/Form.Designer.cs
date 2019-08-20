@@ -804,7 +804,7 @@
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33333F));
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 75F));
             this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 33.33334F));
-            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 55F));
+            this.tableLayoutPanel3.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 58F));
             this.tableLayoutPanel3.Controls.Add(this.label5, 3, 0);
             this.tableLayoutPanel3.Controls.Add(this.labelMinimun, 4, 0);
             this.tableLayoutPanel3.Controls.Add(this.label7, 5, 0);
@@ -848,7 +848,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Century Gothic", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(276, 0);
+            this.label7.Location = new System.Drawing.Point(275, 0);
             this.label7.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(42, 17);
@@ -859,7 +859,7 @@
             // 
             this.labelMaximun.AutoSize = true;
             this.labelMaximun.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelMaximun.Location = new System.Drawing.Point(326, 0);
+            this.labelMaximun.Location = new System.Drawing.Point(325, 0);
             this.labelMaximun.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelMaximun.Name = "labelMaximun";
             this.labelMaximun.Size = new System.Drawing.Size(15, 17);
@@ -870,7 +870,7 @@
             // 
             this.label9.AutoSize = true;
             this.label9.Font = new System.Drawing.Font("Century Gothic", 10.2F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label9.Location = new System.Drawing.Point(385, 0);
+            this.label9.Location = new System.Drawing.Point(383, 0);
             this.label9.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(69, 17);
@@ -881,7 +881,7 @@
             // 
             this.labelTimeAverage.AutoSize = true;
             this.labelTimeAverage.Font = new System.Drawing.Font("Century Gothic", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.labelTimeAverage.Location = new System.Drawing.Point(460, 0);
+            this.labelTimeAverage.Location = new System.Drawing.Point(458, 0);
             this.labelTimeAverage.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.labelTimeAverage.Name = "labelTimeAverage";
             this.labelTimeAverage.Size = new System.Drawing.Size(15, 17);
